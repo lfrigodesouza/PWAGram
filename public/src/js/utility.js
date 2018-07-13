@@ -1,7 +1,13 @@
 var dbPromise = idb.open('post-store', 1, function (db) {
+    debugger;
     if (!db.objectStoreNames.contains('posts')) {
         db.createObjectStore('posts', {
-            keyPath: 'ID'
+            keyPath: 'id'
+        });
+    }
+    if (!db.objectStoreNames.contains('sync-posts')) {
+        db.createObjectStore('sync-posts', {
+            keyPath: 'id'
         });
     }
 });

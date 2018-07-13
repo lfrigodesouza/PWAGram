@@ -1,7 +1,7 @@
 importScripts('/src/js/idb.js');
 importScripts('/src/js/utility.js');
 
-var CACHE_STATIC_NAME = 'static-v21';
+var CACHE_STATIC_NAME = 'static-v24';
 var CACHE_DYNAMIC_NAME = 'dynamic-v2';
 var STATIC_FILES = [
   '/',
@@ -212,3 +212,44 @@ self.addEventListener('fetch', function (event) {
 //       return caches.match(event.request);
 //     }));
 // });
+
+self.addEventListener('sync', function (evt) {
+  debugger;
+  console.log('[Service Worker] Background Syncing', evt);
+  if (evt.tag === 'sync-new-posts') {
+    console.log('[Service Workder] Syncing new Posts');
+    evt.waitUntil(
+      readAllData('sync-posts')
+      .then(function (data) {
+        for (var dt of data) {
+          fetch('https://pwagram-7edc8.firebaseio.com/posts.json', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              },
+              body: JSON.stringify({
+                id: dt.id,
+                title: dt.title,
+                location: dt.location,
+                image: 'https://firebasestorage.googleapis.com/v0/b/pwagram-7edc8.appspot.com/o/sf-boat.jpg?alt=media&token=a001905a-4c52-4903-a485-522c2b7012f4'
+              })
+            })
+            .then(function (res) {
+              console.log('Sent data', res);
+              if (res.ok) {
+                deleteItemFromData('sync-posts', dt.id);
+              }
+            })
+            .catch(function (err) {
+              console.log(err);
+            });
+        }
+      })
+    );
+  }
+});
+
+self.addEventListener('push', function (evt) {
+  debugger;
+});
